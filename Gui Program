@@ -1,0 +1,430 @@
+import os
+
+import df2img
+import os
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import PySimpleGUI as sg
+from fpdf import FPDF
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+"""
+ interface page one
+
+Dimensionless Generator v 1.0
+
+berdasarkan Buckingham π theorem mereferensi ke 
+Szirtes,Thomas.1997."Applied dimensional analysis and modeling".Butterworth Heinemann is an imprint of Elsevier
+30 Corporate Drive, Suite 400, Burlington, MA 01803, USA
+Linacre House, Jordan Hill, Oxford OX2 8DP, UK
+Copyright © 2007, Elsevier Inc. All rights reserved.
+"""
+
+sg.theme('Kayak')   # thema window
+#halaman 1
+def main_window():
+    dimensions1 = [
+                    [sg.Text('[L]:', size=(5, 1)), sg.Spin(values=[i for i in range(-100, 100)], initial_value=0, size=(3, 1), key="-L-")],
+                    [sg.Text('[M]:', size=(5, 1)),sg.Spin(values=[i for i in range(-100, 100)], initial_value=0, size=(3, 1), key="-M-")],
+                    [sg.Text('[T]:', size=(5, 1)),sg.Spin(values=[i for i in range(-100, 100)], initial_value=0, size=(3, 1), key="-T-")]
+                    ]
+
+    dimensions2 = [
+                    [sg.Text('[\u03B8]:', size=(5, 1)),sg.Spin(values=[i for i in range(-100, 100)], initial_value=0, size=(3, 1), key="-THETA-")],
+                    [sg.Text('[mol]:', size=(5, 1)), sg.Spin(values=[i for i in range(-100, 100)], initial_value=0, size=(3, 1), key="-MOL-")],
+                    [sg.Text('[A]:', size=(5, 1)), sg.Spin(values=[i for i in range(-100, 100)], initial_value=0, size=(3, 1), key="-A-")]
+                    ]
+
+    dimensions3 = [[sg.Text('[Cd]:', size=(5, 1)), sg.Spin(values=[i for i in range(-100, 100)], initial_value=0, size=(3, 1), key="-CD-")], [sg.VPush(), sg.T("")], [sg.VPush(), sg.T("")]]
+    
+    list_of_simbole = ["\u0394",	#Δ	GREEK CAPITAL LETTER DELTA
+                        "\u03A9",	#Ω	GREEK CAPITAL LETTER OMEGA
+                        "\u03C0",	#π	GREEK SMALL LETTER PI
+                        "\u03F4",	#ϴ	GREEK CAPITAL THETA SYMBOL
+                        "\u03BB",	#λ	GREEK SMALL LETTER LAMDA
+                        "\u03B8",	#θ	GREEK SMALL LETTER THETA
+                        "\u03B1",	#°	DEGREE SYMBOL
+                        "i\u0302",	#î	i HAT
+                        "j\u0302",	#ĵ	j HAT
+                        "k\u0302",	#k̂	k HAT
+                        "u\u0302",	#û	u HAT
+                        "\u03B1",	#α	GREEK SMALL LETTER ALPHA
+                        "\u03B2",	#β	GREEK SMALL LETTER BETA
+                        "\u03B3",	#γ	GREEK SMALL LETTER GAMMA
+                        "\u03B4",	#δ	GREEK SMALL LETTER DELTA
+                        "\u03B5",	#ε	GREEK SMALL LETTER EPSILON
+                        "\u03B6",	#ζ	GREEK SMALL LETTER ZETA
+                        "\u03B7",	#η	GREEK SMALL LETTER ETA
+                        "\u03B8",	#θ	GREEK SMALL LETTER THETA
+                        "\u03B9",	#ι	GREEK SMALL LETTER IOTA
+                        "\u03BA",	#κ	GREEK SMALL LETTER KAPPA
+                        "\u03BB",	#λ	GREEK SMALL LETTER LAMDA
+                        "\u03BC",	#μ	GREEK SMALL LETTER MU
+                        "\u03BD",	#ν	GREEK SMALL LETTER NU
+                        "\u03BE",	#ξ	GREEK SMALL LETTER XI
+                        "\u03BF",	#ο	GREEK SMALL LETTER OMICRON
+                        "\u03C0",	#π	GREEK SMALL LETTER PI
+                        "\u03C1",	#ρ	GREEK SMALL LETTER RHO
+                        "\u03C2",	#ς	GREEK SMALL LETTER FINAL SIGMA
+                        "\u03C3",	#σ	GREEK SMALL LETTER SIGMA
+                        "\u03C4",	#τ	GREEK SMALL LETTER TAU
+                        "\u03C5",	#υ	GREEK SMALL LETTER UPSILON
+                        "\u03C6",	#φ	GREEK SMALL LETTER PHI
+                        "\u03C7",	#χ	GREEK SMALL LETTER CHI
+                        "\u03C8",	#ψ	GREEK SMALL LETTER PSI
+                        "\u03C9",	#ω	GREEK SMALL LETTER OMEGA
+                        "\u0391",	#Α	GREEK CAPITAL LETTER ALPHA
+                        "\u0392",	#Β	GREEK CAPITAL LETTER BETA
+                        "\u0393",	#Γ	GREEK CAPITAL LETTER GAMMA
+                        "\u0394",	#Δ	GREEK CAPITAL LETTER DELTA
+                        "\u0395",	#Ε	GREEK CAPITAL LETTER EPSILON
+                        "\u0396",	#Ζ	GREEK CAPITAL LETTER ZETA
+                        "\u0397",	#Η	GREEK CAPITAL LETTER ETA
+                        "\u0398",	#Θ	GREEK CAPITAL LETTER THETA
+                        "\u0399",	#Ι	GREEK CAPITAL LETTER IOTA
+                        "\u039A",	#Κ	GREEK CAPITAL LETTER KAPPA
+                        "\u039B",	#Λ	GREEK CAPITAL LETTER LAMDA
+                        "\u039C",	#Μ	GREEK CAPITAL LETTER MU
+                        "\u039D",	#Ν	GREEK CAPITAL LETTER NU
+                        "\u039E",	#Ξ	GREEK CAPITAL LETTER XI
+                        "\u039F",	#Ο	GREEK CAPITAL LETTER OMICRON
+                        "\u03A0",	#Π	GREEK CAPITAL LETTER PI
+                        "\u03A1",	#Ρ	GREEK CAPITAL LETTER RHO
+                        "\u03A3",	#Σ	GREEK CAPITAL LETTER SIGMA
+                        "\u03A4",	#Τ	GREEK CAPITAL LETTER TAU
+                        "\u03A5",	#Υ	GREEK CAPITAL LETTER UPSILON
+                        "\u03A6",	#Φ	GREEK CAPITAL LETTER PHI
+                        "\u03A7",	#Χ	GREEK CAPITAL LETTER CHI
+                        "\u03A8",	#Ψ	GREEK CAPITAL LETTER PSI
+                        "\u03A9",	#Ω	GREEK CAPITAL LETTER OMEGA
+                        "\u03F4"]	#ϴ	GREEK CAPITAL THETA SYMBOL
+    
+    layout_page1_l = [
+                [sg.Frame('Input Parameter', [
+                                                [sg.Text('Nama Parameter :')],
+                                                [sg.InputText(size=(40, 1), font=("Arial"), expand_x=True, key="-PAR NAME-")],
+                                                [sg.Text('Simbol :'),sg.Combo(list_of_simbole, s=(15,22), expand_x=True, key="-SIMBOL-"), sg.Text('Unit :'), sg.InputText(size=(16, 1), font=("Arial"), expand_x=True, key="-UNIT-")],
+                                                [sg.Text('Remark :')],
+                                                [sg.Multiline(size=(38, 5), font=("Arial"), expand_x=True, expand_y=True, key="-REMARK-")],
+                                                [sg.Text('Pangkat Dimensi :')],
+                                                [sg.Column(dimensions1, expand_x=True), sg.VSep(), sg.Column(dimensions2, expand_x=True), sg.VSep(), sg.Column(dimensions3, expand_x=True)],
+                                                [sg.Push(), 
+                                                        sg.Button('Submit', s=(8,1), button_color=('black', 'green'), auto_size_button=True), 
+                                                        sg.Button('Hapus', s=(8,1), button_color=('black', 'yellow'), auto_size_button=True), 
+                                                        sg.Button('Clear All', s=(8,1), button_color=('black', 'red'), auto_size_button=True)]
+                                                ], expand_x=True, expand_y=True)
+                    ]
+                ]
+
+    column_names = ["Parameter Name", "Simbol", "Unit", "L", "M", "T", "\u03B8", "mol", "A", "Cd", "Remark"]
+    analytical_matrix = sg.Table([], headings=column_names, num_rows=3, expand_x=True, expand_y=True, alternating_row_color="green", auto_size_columns=True, k= '-Analytical Parameter-')
+    layout_page1_r = [
+                        [sg.Frame('Analytical Parameter', [[analytical_matrix]],  expand_x=True, expand_y=True, key="-kontainer anal par table-")],
+                        [sg.Push(), sg.Button('Generate', s=(8,1), key="-GENERATE-")]
+                        ]
+        
+    layout_page_1 = [[sg.Col(layout_page1_l, expand_x=True, expand_y=True),sg.Col(layout_page1_r, expand_x=True, expand_y=True)]]
+
+    #halaman_dua:
+    dimension_set = [
+                    [sg.Combo(["set 1", "set 2", "set 3"], default_value="select set", s=(15,22), readonly=True, k='-DIMENSION SET-', expand_x=True)]]
+    layout_page_2 = [[sg.Frame(
+                                'Posible Dimensional Set', 
+                                [
+                                    [sg.Button('Generate All Posibilities')],
+                                    [
+                                        sg.Col([[sg.Frame('Dimensional Matrix', [[sg.Output(expand_x=True, expand_y=True)]], expand_x=True, expand_y=True)]], expand_x=True, expand_y=True), 
+                                        sg.Col([[sg.Frame('Dimensionless Matrix', [], expand_x=True, expand_y=True)]], expand_x=True, expand_y=True), 
+                                        sg.Col([[sg.Frame('Dimensionless Set', dimension_set, expand_x=True, expand_y=True)], [sg.Push(), sg.Button('Export', key="-HASIL HAL 2-")]], expand_x=True, expand_y=True)
+                                    ]
+                                ], expand_x=True, expand_y=True
+                                )
+                        ]]
+
+
+
+    layout = [[sg.TabGroup([[sg.Tab('One Set', layout_page_1), sg.Tab('All Posible Set', layout_page_2), sg.Tab('Fitting Model', [[]])]], expand_x=True, expand_y=True)]]
+    # Create the Window
+    return sg.Window('Dimensionless Generator v 1.0', layout, resizable=True, finalize=True)
+     
+
+def one_set_window(data_dimension, header_dimension, data_result, header_result):
+    
+    dimensional_matrix = sg.Table(data_dimension, headings=header_dimension, num_rows=5, expand_x=True, expand_y=True, alternating_row_color="green", auto_size_columns=True, k= '-Dimensional Matrix-')
+    dimensionless_matrix = sg.Table(data_result, headings=header_result, num_rows=5, expand_x=True, expand_y=True, alternating_row_color="green", auto_size_columns=True, k= '-Dimensionless Matrix-')
+    dimensionless_set = sg.Canvas(expand_x=True, expand_y=True, k= '-Dimensionless Set-')
+
+    layout_page = [
+                    [
+                        sg.Frame('Dimensional Matrix', [[dimensional_matrix]],  expand_x=True, expand_y=True), 
+                        sg.Frame('Dimensionless Matrix', [[dimensionless_matrix]], expand_x=True, expand_y=True)
+                    ],
+                    [sg.Frame('Dimensionless Set', [[dimensionless_set]], expand_x=True, expand_y=True)],
+                    [sg.Push(),sg.InputText(visible=False, enable_events=True, key='file_path'), sg.FileSaveAs('Export', target="file_path", s=(8,1), key="-HASIL ONE SET-")]
+                ]
+    return sg.Window('Dimensionless Set', layout_page, resizable=True, finalize=True)
+     
+
+window_utama, window_one_set = main_window(), None
+#mainprogram
+#membuat data frame
+column_names = ["Parameter Name", "Simbol", "Unit", "L", "M", "T", "\u03B8", "mol", "A", "Cd", "Remark"]
+df = pd.DataFrame(columns = column_names)
+#membuat dimensionless matrix
+def matrix_dimentionless(dimensi_matrix):
+    Nd, Nv = dimensi_matrix.shape
+    A = dimensi_matrix.iloc[:,-Nd:]
+    A = A.to_numpy()
+    A = A.astype(np.int)
+    B = dimensi_matrix.iloc[:,:(Nv-Nd)]
+    n,m = B.shape
+    B = B.to_numpy()
+    B = B.astype(np.int)
+    D = np.identity(m)
+    det_A = np.linalg.det(A)
+    if det_A == 0:
+        i = 'Singular Matrix'
+        state = False
+        return state, i
+    inv_A = np.linalg.inv(A)
+    C = np.dot(-D,(np.dot(inv_A, B)).T)
+
+    indexs = []
+    for i in range(m):
+        i = f"\u03A0_{i+1}"
+        indexs.append(i)
+
+    result_matrix = np.concatenate((D, C), axis=1)
+    result_matrix = pd.DataFrame(result_matrix, columns= dimensi_matrix.columns, index = indexs)
+    state = True
+    return state, result_matrix
+
+def gabung_ujung_list(ujung, belakang): 
+    gabung = []
+    for i in range(len(ujung)):
+        A = [ujung[i]] + belakang[i]
+        gabung.append(A)
+    return gabung
+#Fungsi Penyusun Latex Expression
+def dimension_set_Latex(DC): #input DataFarame Dimensionless Set
+    list_index = list(DC.index)
+    list_colums = list(DC.columns)
+    formula_belakang = ""
+    dimensionless_set_fix = []
+    dimensionless_set_fix_listed = ""
+    for a, i in enumerate(list_index):
+        m = a+1
+        Pi_x = r"\Pi_{" + f"{m}" + "}"
+        dimensionless_set_bawah_fix = ""
+        dimensionless_set_atas_fix = ""
+        n = 0
+        if  m == 1:
+            formula_depan = Pi_x + "="
+        if m == 2 :
+            formula_belakang += Pi_x
+        if m > 2:
+            formula_belakang += f",{Pi_x}"
+        for b, k in enumerate(list_colums):
+            data = DC.iloc[a,b]
+            if data == 0:
+                dimensionless_set_atas = ""
+                dimensionless_set_atas_fix += dimensionless_set_atas
+            if data == 1:
+                dimensionless_set_atas = f"{k}" + "^{}"
+                dimensionless_set_atas_fix += dimensionless_set_atas
+            if data > 1:
+                dimensionless_set_atas = f"{k}" + "^{" + f"{data}" + "}"
+                dimensionless_set_atas_fix += dimensionless_set_atas
+            if data < 0:
+                data = -1*data
+                if data == 1:
+                    dimensionless_set_bawah = f"{k}" + "^{}"
+                    dimensionless_set_bawah_fix += dimensionless_set_bawah
+                    n +=1
+                else:
+                    dimensionless_set_bawah = f"{k}" + "^{" + f"{data}" + "}"
+                    dimensionless_set_bawah_fix += dimensionless_set_bawah
+                    n +=1
+        if n == 0:
+            dimensionless_set_fix_n = "$" + Pi_x + " = " + dimensionless_set_atas_fix + "$"
+            dimensionless_set_fix += dimensionless_set_fix_n
+        if n != 0:
+            dimensionless_set_fix_n = "$" + Pi_x + r" = \frac{"+ f"{dimensionless_set_atas_fix}" + "}{" + f"{dimensionless_set_bawah_fix}" + "}$"
+            dimensionless_set_fix += [dimensionless_set_fix_n]
+    formula_fix = r"$" + formula_depan + " f ("+ formula_belakang + ")$"
+    for g in dimensionless_set_fix:
+        dimensionless_set_fix_listed += g + "\n"
+    return formula_fix, dimensionless_set_fix_listed  #Output pi1 = f(pin) dan pi = variable
+#memnghubungkan sg.Canvas dengan plot
+def create_Latex_Text(formula, dimensionless_set, canvas): #input  formula dan dimensionless set 
+    fig = (plt.figure().subplots(1,2))
+    fig[0].text(0.0, 0.9, dimensionless_set, fontsize='xx-large', 
+                horizontalalignment='left',
+                verticalalignment='top',
+                va="top", 
+                ha="left", 
+                multialignment="left",
+                bbox=dict(fc="none"))
+    fig[1].text(0.0, 0.9, formula, fontsize='xx-large', 
+                horizontalalignment='left',
+                verticalalignment='top',
+                va="top", 
+                ha="left", 
+                multialignment="left",
+                bbox=dict(fc="none"))
+    fig[0].axis("off")
+    fig[1].axis("off")
+    figure = plt.gcf()
+    figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
+    figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
+    return figure_canvas_agg, fig
+#convert data frame to png
+def convert_df_to_image(df, path):
+    df1 = df.loc[:, ~(df == 0).all()]
+    tinggi= (len(df. index)+1)*30
+    fig = df2img.plot_dataframe(df1, fig_size=(600, tinggi))
+    df2img.save_dataframe(fig=fig, filename = f"{path}")
+    
+# Event Loop to process "events" and get the "values" of the inputs
+while True:
+    window, event, values = sg.read_all_windows()
+    print(f"event: {event} " + f"value: {values}")
+    if window != window_one_set:
+        try:
+            par = values["-PAR NAME-"]
+            simbol = values["-SIMBOL-"]
+            unit = values["-UNIT-"]
+            remark = values["-REMARK-"]
+            L = values["-L-"]
+            M = values["-M-"]
+            T = values["-T-"]
+            theta = values["-THETA-"]
+            mol = values["-MOL-"]
+            A = values["-A-"]
+            Cd = values["-CD-"]
+        except:
+              pass
+    if event == sg.WIN_CLOSED:
+        window.close()
+        if window == window_one_set:       # if closing win 2, mark as closed
+            window_one_set = None
+        elif window == window_utama:     # if closing win 1, exit program
+            break
+    
+    if event == "Submit":
+        try:
+            analytical_matrix = window['-Analytical Parameter-']
+            if simbol in list(df["Simbol"]):
+                sg.popup("Simbol tidak boleh sama", keep_on_top=True)
+            else:
+                df = df.append(
+                                {
+                                "Parameter Name" : par, 
+                                "Simbol" : simbol, 
+                                "Unit" : unit, 
+                                'L': L, 
+                                'M': M,
+                                'T': T, 
+                                '\u03B8' : theta, 
+                                'mol': mol, 
+                                'A': A, 
+                                'Cd': Cd, 
+                                'Remark': remark
+                                }, ignore_index = True
+                            )
+                
+                data =df.values.tolist()
+                analytical_matrix.update(values=data)
+        except Exception as e:
+            sg.popup(f"A Bug Masse: {e}", keep_on_top=True)
+    if event == "Hapus":
+        try:
+            df.drop(df.tail(1).index,inplace=True)
+            data =df.values.tolist()
+            analytical_matrix.update(values=data)
+        except Exception as e:
+            sg.popup(f"A Bug Masse: {e}", keep_on_top=True)
+    if event == "Clear All":
+        try:
+            df.drop(df.index,inplace=True)
+            data =df.values.tolist()
+            analytical_matrix.update(values=data)
+        except Exception as e:
+            sg.popup(f"A Bug Masse: {e}", keep_on_top=True)
+    if event == "-GENERATE-" and not window_one_set:
+        try:
+            matrix_raw = df.iloc[:,3:10]
+            dimensi_matrix= matrix_raw.loc[:, ~(df == 0).all()]
+            dimensi_matrix = dimensi_matrix.rename(df['Simbol'], axis=0).T
+            state, DC = matrix_dimentionless(dimensi_matrix)
+            formula_fix, dimensionless_set_fix_listed = dimension_set_Latex(DC)
+            #olah data
+            if state == False:
+                data_dimension = dimensi_matrix.values.tolist()
+                header_dimension = dimensi_matrix.columns
+                window_one_set = one_set_window(data_dimension, header_dimension,[],[])
+                sg.popup("Matrix A singular!!!", keep_on_top=True)
+            elif state == True:
+                data_dimension = dimensi_matrix.values.tolist()
+                header_dimension = [" "] + list(dimensi_matrix.columns)
+                first_row_dimension = list(dimensi_matrix.index)
+                data_dimension = gabung_ujung_list(first_row_dimension, data_dimension)
+                data_result = DC.values.tolist()
+                header_result = [" "] + list(DC.columns)
+                first_row_result = list(DC.index)
+                data_result = gabung_ujung_list(first_row_result, data_result)
+                window_one_set = one_set_window(data_dimension, header_dimension, data_result, header_result)
+                canvas = window_one_set['-Dimensionless Set-'].TKCanvas
+                conection, formula_fig = create_Latex_Text(formula_fix, dimensionless_set_fix_listed, canvas)
+        except Exception as e:
+            sg.popup(f"A Bug Masse: {e}", keep_on_top=True)
+    if (event == 'file_path') and (values['file_path'] != ''):
+        try:
+            # 1. convert the PDF doc contents
+            save = values['file_path']
+            main_dataframe_pdf = df
+            convert_df_to_image(main_dataframe_pdf, "main.png")
+            dimensional_dataframe_pdf = dimensi_matrix
+            convert_df_to_image(dimensional_dataframe_pdf, "dimensional_dataframe.png")
+            dimensionless_dataframe_pdf = DC
+            convert_df_to_image(dimensionless_dataframe_pdf, "dimensionless_dataframe.png")
+            #convert formula figure
+            plt.savefig("formula.png")
+            
+            # 1. Set up the PDF doc basics
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font('Arial', 'B', 16)
+            pdf.cell(40, 10, "Dimensionlessm Set Buckingham's theorem")
+            pdf.ln(10)
+            pdf.image("main.png", h=60, w=190)
+            pdf.ln(10)
+            pdf.cell(40, 10, "Dimensional Matrix")
+            pdf.ln(10)
+            pdf.image("dimensional_dataframe.png", h=60, w=190)
+            pdf.ln(10)
+            pdf.cell(40, 10, "Dimensionless Set Matrix")
+            pdf.ln(10)
+            pdf.image("dimensionless_dataframe.png", h=60, w=190)
+            pdf.ln(30)
+            pdf.cell(40, 10, "Formula")
+            pdf.ln(10)
+            pdf.image("formula.png")
+            # 3. Output the PDF file
+            pdf.output(save, 'F')
+            os.remove("main.png")
+            os.remove("dimensional_dataframe.png")
+            os.remove("dimensionless_dataframe.png")
+            os.remove("formula.png")
+        except Exception as e:
+            sg.popup(f"A Bug Masse: {e}", keep_on_top=True)
+    if event == 'Generate All Posibilities':
+        layout_page = [
+                        [sg.InputText(size=(40, 1), font=("Arial"), expand_x=True, key="COBA")],
+                        [sg.Button("save")]
+                    ]
+        sg.Window('test', layout_page, resizable=True, finalize=True)
+     
+    
+window.close()
